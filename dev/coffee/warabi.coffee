@@ -74,4 +74,3 @@ selectTransparentArea = (target) ->
 
 setup()
 main()
-alert('complete!')

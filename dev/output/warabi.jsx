@@ -263,6 +263,4 @@ if(false){ alert('trap') }
 
   main();
 
-  alert('complete!');
-
 }).call(this);
