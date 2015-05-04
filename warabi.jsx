@@ -197,7 +197,7 @@ if(false){ alert('trap') }
   };
 
   sort = function() {
-    var block, blocks, coords, i, layer, len, packer, results;
+    var block, blocks, coords, i, j, layer, len, len1, packer, results;
     blocks = (function() {
       var i, len, ref, results;
       ref = targetLayerSet.artLayers;
@@ -217,11 +217,15 @@ if(false){ alert('trap') }
       return results;
     })();
     packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096);
-    results = [];
     for (i = 0, len = blocks.length; i < len; i++) {
       block = blocks[i];
       coords = packer.findCoords(block.w.value, block.h.value);
-      results.push(block.layer.translate(UnitValue(coords.x, 'px') - block.x, UnitValue(coords.y, 'px') - block.y));
+      block.coords = coords;
+    }
+    results = [];
+    for (j = 0, len1 = blocks.length; j < len1; j++) {
+      block = blocks[j];
+      results.push(block.layer.translate(UnitValue(block.coords.x, 'px') - block.x, UnitValue(block.coords.y, 'px') - block.y));
     }
     return results;
   };

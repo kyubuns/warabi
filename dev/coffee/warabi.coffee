@@ -38,10 +38,12 @@ sort = ->
 
   packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096)
   for block in blocks
-    coords = packer.findCoords(block.w.value, block.h.value)
+    block.coords = packer.findCoords(block.w.value, block.h.value)
+
+  for block in blocks
     block.layer.translate(
-      UnitValue(coords.x, 'px') - block.x,
-      UnitValue(coords.y, 'px')-block.y
+      UnitValue(block.coords.x, 'px') - block.x,
+      UnitValue(block.coords.y, 'px')-block.y
     )
 
 createAlpha = ->
