@@ -1,26 +1,33 @@
-if app.documents.length == 0
-  alert('対象のpsdを開いてから実行してください。')
-  return
-
-if app.activeDocument.activeLayer.typename != 'LayerSet'
-  alert('対象のLayerSetを選択してください。')
-  return
-
 targetLayerSet = ''
 border = null
 
 setup = ->
   border = UnitValue(2, 'px')
   preferences.rulerUnits = Units.PIXELS
-  targetLayerSet = app.activeDocument.activeLayer
+
+  if app.documents.length == 0
+    alert('対象のpsdを開いてから実行してください。')
+    return false
+
+  if app.activeDocument.activeLayer.typename == 'LayerSet'
+    targetLayerSet = app.activeDocument.activeLayer
+  else
+    if app.activeDocument.activeLayer.parent.typename == 'LayerSet'
+      targetLayerSet = app.activeDocument.activeLayer.parent
+    else
+      alert('対象のLayerSetを選択してください。')
+      return false
+
+  return true
 
 main = ->
+  prevActiveLayer = app.activeDocument.activeLayer
   sort()
   createAlpha()
-  app.activeDocument.activeLayer = targetLayerSet
+  app.activeDocument.activeLayer = prevActiveLayer
 
 sort = ->
-  blocks = for layer in targetLayerSet.artLayers
+  blocks = for layer in targetLayerSet.artLayers when layer.visible
     {
       x: layer.bounds[0]
       y: layer.bounds[1]
@@ -72,5 +79,5 @@ selectTransparentArea = (target) ->
 
   executeAction( charIDToTypeID( "setd" ), actionDesc, DialogModes.NO )
 
-setup()
-main()
+if setup()
+  main()

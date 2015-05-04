@@ -164,16 +164,6 @@ if(false){ alert('trap') }
 (function() {
   var border, createAlpha, findOrCreateAlphaChannel, main, selectTransparentArea, setup, sort, targetLayerSet;
 
-  if (app.documents.length === 0) {
-    alert('対象のpsdを開いてから実行してください。');
-    return;
-  }
-
-  if (app.activeDocument.activeLayer.typename !== 'LayerSet') {
-    alert('対象のLayerSetを選択してください。');
-    return;
-  }
-
   targetLayerSet = '';
 
   border = null;
@@ -181,13 +171,29 @@ if(false){ alert('trap') }
   setup = function() {
     border = UnitValue(2, 'px');
     preferences.rulerUnits = Units.PIXELS;
-    return targetLayerSet = app.activeDocument.activeLayer;
+    if (app.documents.length === 0) {
+      alert('対象のpsdを開いてから実行してください。');
+      return false;
+    }
+    if (app.activeDocument.activeLayer.typename === 'LayerSet') {
+      targetLayerSet = app.activeDocument.activeLayer;
+    } else {
+      if (app.activeDocument.activeLayer.parent.typename === 'LayerSet') {
+        targetLayerSet = app.activeDocument.activeLayer.parent;
+      } else {
+        alert('対象のLayerSetを選択してください。');
+        return false;
+      }
+    }
+    return true;
   };
 
   main = function() {
+    var prevActiveLayer;
+    prevActiveLayer = app.activeDocument.activeLayer;
     sort();
     createAlpha();
-    return app.activeDocument.activeLayer = targetLayerSet;
+    return app.activeDocument.activeLayer = prevActiveLayer;
   };
 
   sort = function() {
@@ -198,13 +204,15 @@ if(false){ alert('trap') }
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         layer = ref[i];
-        results.push({
-          x: layer.bounds[0],
-          y: layer.bounds[1],
-          w: layer.bounds[2] - layer.bounds[0] + border,
-          h: layer.bounds[3] - layer.bounds[1] + border,
-          layer: layer
-        });
+        if (layer.visible) {
+          results.push({
+            x: layer.bounds[0],
+            y: layer.bounds[1],
+            w: layer.bounds[2] - layer.bounds[0] + border,
+            h: layer.bounds[3] - layer.bounds[1] + border,
+            layer: layer
+          });
+        }
       }
       return results;
     })();
@@ -259,8 +267,8 @@ if(false){ alert('trap') }
     return executeAction(charIDToTypeID("setd"), actionDesc, DialogModes.NO);
   };
 
-  setup();
-
-  main();
+  if (setup()) {
+    main();
+  }
 
 }).call(this);
