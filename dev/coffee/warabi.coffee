@@ -36,7 +36,7 @@ sort = ->
       layer: layer
     }
 
-  packer = new NETXUS.RectanglePacker(activeDocument.width.value, activeDocument.height.value)
+  packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096)
   for block in blocks
     coords = packer.findCoords(block.w.value, block.h.value)
     block.layer.translate(

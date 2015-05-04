@@ -216,7 +216,7 @@ if(false){ alert('trap') }
       }
       return results;
     })();
-    packer = new NETXUS.RectanglePacker(activeDocument.width.value, activeDocument.height.value);
+    packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096);
     results = [];
     for (i = 0, len = blocks.length; i < len; i++) {
       block = blocks[i];
