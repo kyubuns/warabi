@@ -7,7 +7,10 @@ if app.activeDocument.activeLayer.typename != 'LayerSet'
   return
 
 targetLayerSet = ''
+border = null
+
 setup = ->
+  border = UnitValue(2, 'px')
   preferences.rulerUnits = Units.PIXELS
   targetLayerSet = app.activeDocument.activeLayer
 
@@ -17,40 +20,41 @@ main = ->
   app.activeDocument.activeLayer = targetLayerSet
 
 sort = ->
-  targets = targetLayerSet.artLayers
-  blocks = []
-  border = UnitValue(2, 'px')
-  for layer in targetLayerSet.artLayers
-    blocks.push({
+  blocks = for layer in targetLayerSet.artLayers
+    {
       x: layer.bounds[0]
       y: layer.bounds[1]
       w: layer.bounds[2] - layer.bounds[0] + border
       h: layer.bounds[3] - layer.bounds[1] + border
       layer: layer
-    })
+    }
 
   packer = new NETXUS.RectanglePacker(activeDocument.width.value, activeDocument.height.value)
   for block in blocks
     coords = packer.findCoords(block.w.value, block.h.value)
-    original = [block.x, block.y]
-    fix = [UnitValue(coords.x, 'px'), UnitValue(coords.y, 'px')]
-    block.layer.translate(fix[0]-original[0], fix[1]-original[1])
+    block.layer.translate(
+      UnitValue(coords.x, 'px') - block.x,
+      UnitValue(coords.y, 'px')-block.y
+    )
 
 createAlpha = ->
-  copy = targetLayerSet.duplicate()
-  mergedLayer = copy.merge()
-  targetAlphaChannel = null
-  for channel in activeDocument.channels
-    if channel.name == targetLayerSet.name + "_a"
-      targetAlphaChannel = channel
-  if targetAlphaChannel == null
-    targetAlphaChannel = activeDocument.channels.add()
-    targetAlphaChannel.name = targetLayerSet.name + "_a"
+  targetAlphaChannel = findOrCreateAlphaChannel(targetLayerSet.name + "_a")
 
+  mergedLayer = targetLayerSet.duplicate().merge()
   selectTransparentArea(mergedLayer)
   activeDocument.selection.store(targetAlphaChannel)
   activeDocument.selection.deselect()
   mergedLayer.remove()
+
+findOrCreateAlphaChannel = (layerName) ->
+  target = null
+  for channel in activeDocument.channels
+    if channel.name == layerName
+      target = channel
+  if target == null
+    target = activeDocument.channels.add()
+    target.name = layerName
+  target
 
 selectTransparentArea = (target) ->
   # http://tiku.io/questions/3467018/setting-selection-to-layer-transparency-channel-using-extendscript-in-photoshop
