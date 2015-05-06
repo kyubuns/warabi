@@ -26,8 +26,8 @@ main = ->
   createAlpha()
   app.activeDocument.activeLayer = prevActiveLayer
 
-sort = ->
-  blocks = for layer in targetLayerSet.artLayers when layer.visible
+find_targets = (layerSet) ->
+  a = for layer in layerSet.artLayers when layer.visible
     {
       x: layer.bounds[0]
       y: layer.bounds[1]
@@ -35,15 +35,21 @@ sort = ->
       h: layer.bounds[3] - layer.bounds[1] + border
       layer: layer
     }
+  for set in layerSet.layerSets when set.visible
+    a = a.concat(find_targets(set))
+  a
+
+sort = ->
+  targets = find_targets(targetLayerSet)
 
   packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096)
-  for block in blocks
-    block.coords = packer.findCoords(block.w.value, block.h.value)
+  for target in targets
+    target.coords = packer.findCoords(target.w.value, target.h.value)
 
-  for block in blocks
-    block.layer.translate(
-      UnitValue(block.coords.x, 'px') - block.x,
-      UnitValue(block.coords.y, 'px')-block.y
+  for target in targets
+    target.layer.translate(
+      UnitValue(target.coords.x, 'px') - target.x,
+      UnitValue(target.coords.y, 'px')-target.y
     )
 
 createAlpha = ->
