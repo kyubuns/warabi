@@ -33,6 +33,7 @@ find_targets = (layerSet) ->
       y: layer.bounds[1]
       w: layer.bounds[2] - layer.bounds[0] + border
       h: layer.bounds[3] - layer.bounds[1] + border
+      size: (layer.bounds[2] - layer.bounds[0]) * (layer.bounds[3] - layer.bounds[1])
       layer: layer
     }
   for set in layerSet.layerSets when set.visible
@@ -41,6 +42,7 @@ find_targets = (layerSet) ->
 
 sort = ->
   targets = find_targets(targetLayerSet)
+  targets.sort (a, b) -> b.size - a.size
 
   packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096)
   for target in targets

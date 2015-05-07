@@ -210,6 +210,7 @@ if(false){ alert('trap') }
             y: layer.bounds[1],
             w: layer.bounds[2] - layer.bounds[0] + border,
             h: layer.bounds[3] - layer.bounds[1] + border,
+            size: (layer.bounds[2] - layer.bounds[0]) * (layer.bounds[3] - layer.bounds[1]),
             layer: layer
           });
         }
@@ -229,6 +230,9 @@ if(false){ alert('trap') }
   sort = function() {
     var i, j, len, len1, packer, results, target, targets;
     targets = find_targets(targetLayerSet);
+    targets.sort(function(a, b) {
+      return b.size - a.size;
+    });
     packer = new NETXUS.RectanglePacker(activeDocument.width.value, 4096);
     for (i = 0, len = targets.length; i < len; i++) {
       target = targets[i];
